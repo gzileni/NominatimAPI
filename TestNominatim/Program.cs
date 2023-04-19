@@ -30,4 +30,10 @@ FeatureCollection? fl = await lookup.Features();
 NominatinResponse[]? rs = await search.ToJsonArray();
 NominatinResponse? rr = await reverse.ToJson();
 
+// TODO:
+// 1 - Lookup Json
+// 2 - Search Xml
+// 3 - Reverse Xml
+// 4 - Lookup Xml
+
 Console.WriteLine(fs);
