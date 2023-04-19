@@ -5,13 +5,15 @@ using System.Collections.Specialized;
 using NetTopologySuite.Index.HPRtree;
 using NetTopologySuite.IO;
 using Newtonsoft.Json;
+using System.Net.Http.Headers;
 
 namespace NominatimAPI
 {
-    public class NominatimAPI
+    public abstract class NominatimAPI
     {
 		public string Path { get; set; } = "";
 		public string Url { get; set; } = "https://nominatim.openstreetmap.org";
+
         public Dictionary<EOutuputFormat, string> Output = new()
         {
             { EOutuputFormat.XML, "xml" },
@@ -19,13 +21,9 @@ namespace NominatimAPI
             { EOutuputFormat.GEOJSON, "geojson" }
         };
 
-        public NominatimAPI(string? _url = null)
-		{
-            if (!string.IsNullOrEmpty(_url))
-                this.Url = _url;
-        }
+        public NominatimAPI() {}
 
-        protected static FeatureCollection? DeSerializeFeatureCollection(string? features)
+        private static FeatureCollection? DeSerializeFeatureCollection(string? features)
         {
             if (features is not null)
             {
@@ -40,43 +38,94 @@ namespace NominatimAPI
             return null;
         }
 
-        private static string ToQueryString(Dictionary<string, string> query, string? prefix = null)
+        private static NominatinResponse[]? DeSerializeToJsonArray(string? features)
         {
-            string result = prefix is null ? "?" : $"?{prefix}=";
-            List<string> qList = query.Select(x => {
-                if (!string.IsNullOrEmpty(x.Value))
-                    return string.Format("{0}={1}", x.Key, x.Value);
-                else
-                    return "";
-             }).Where(x => !string.IsNullOrEmpty(x))
-               .ToList();
-
-            for (var i = 0; i < qList.Count; i++)
+            if (features is not null)
             {
-                result += qList[i];
-                if (i < qList.Count - 1)
+                var serializer = GeoJsonSerializer.Create();
+                using (var stringReader = new StringReader(features))
+                using (var jsonReader = new JsonTextReader(stringReader))
+                {
+                    return serializer.Deserialize<NominatinResponse[]>(jsonReader);
+                }
+            }
+
+            return null;
+        }
+
+        private static NominatinResponse? DeSerializeToJson(string? features)
+        {
+            if (features is not null)
+            {
+                var serializer = GeoJsonSerializer.Create();
+                using (var stringReader = new StringReader(features))
+                using (var jsonReader = new JsonTextReader(stringReader))
+                {
+                    return serializer.Deserialize<NominatinResponse>(jsonReader);
+                }
+            }
+
+            return null;
+        }
+
+        protected static string GetQueryFromList(List<string> query)
+        {
+            string result = "?";
+
+            for (var i = 0; i < query.Count; i++)
+            {
+                result += query[i];
+                if (i < query.Count - 1)
                     result += "&";
             }
 
             return result;
         }
 
-        protected static async Task<string> GetData(string url,
-                                                    Dictionary<string, string> query,
-                                                    string? prefix = null)
+        protected static async Task<string> GetData(string url)
         {
             var handler = new SocketsHttpHandler
             {
                 PooledConnectionLifetime = TimeSpan.FromMinutes(15)
             };
 
-            string q = $"{url}{ToQueryString(query, prefix)}";
+            var productValue = new ProductInfoHeaderValue("NominatimAPI", "1.0");
+
             using HttpClient client = new(handler);
-            using HttpResponseMessage response = await client.GetAsync(q);
+            client.DefaultRequestHeaders.UserAgent.Add(productValue);
+            using HttpResponseMessage response = await client.GetAsync(url);
             if (response.IsSuccessStatusCode)
                 return await response.Content.ReadAsStringAsync();
             else
                 throw new Exception("Non sono riuscito a leggere i dati");
+        }
+
+        public abstract string GetUrl(EOutuputFormat output);
+
+        protected static async Task<FeatureCollection?> GetFeatures(string url)
+        {
+            string result = await GetData(url);
+            return DeSerializeFeatureCollection(result);
+        }
+
+        public virtual async Task<FeatureCollection?> Features()
+        {
+            string url = this.GetUrl(EOutuputFormat.GEOJSON);
+            return await GetFeatures(url);
+        }
+
+        public virtual async Task<NominatinResponse[]?> ToJsonArray()
+        {
+            string url = this.GetUrl(EOutuputFormat.JSON);
+            string result = await GetData(url);
+            return DeSerializeToJsonArray(result);
+        }
+
+        public virtual async Task<NominatinResponse?> ToJson()
+        {
+            string url = this.GetUrl(EOutuputFormat.JSON);
+            string result = await GetData(url);
+            return DeSerializeToJson(result);
         }
     }
 }
