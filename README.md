@@ -5,7 +5,7 @@
 ## Install
 
 ```bash
-dotnet add package NominatimAPI --version 1.0.0
+dotnet add package Nominatim --version 1.0.0
 ```
 
 ## [Search](https://nominatim.org/release-docs/develop/api/Search/)
