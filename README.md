@@ -111,3 +111,25 @@ NominatimResponse[]? rl = await lookup.ToJson();
 LookupResultsXML? xl = await lookup.ToXml();
 
 ```
+
+## Custom Docker Image Nominatim
+
+You can configure a nominatim docker image to query your own docker stack. Just configure the new address from the Url property.
+
+You can download docker image from git repository [docker-nominatim](https://github.com/gzileni/docker-nominatim).
+
+```C#
+using NominatimAPI;
+using NetTopologySuite.Features;
+
+/** setting search data */
+NominatimSearch searchData = new()
+{
+    City = "Gioia del Colle"
+};
+
+NominatimAPISearch search = new(searchData);
+
+search.Url = "http://my-container-nominatim";
+FeatureCollection? fs = await search.ToGeoJson();
+```
