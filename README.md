@@ -182,3 +182,4 @@ NominatimAPISearch search = new(searchData);
 search.Url = "http://my-container-nominatim";
 FeatureCollection? fs = await search.ToGeoJson();
 ```
+
