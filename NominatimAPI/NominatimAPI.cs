@@ -9,7 +9,13 @@ using System.Net.Http.Headers;
 
 namespace NominatimAPI
 {
-    public abstract class NominatimAPI
+    public interface INominatimAPIInterface
+    {
+        abstract Task<FeatureCollection?> ToGeoJson();
+        abstract Task<NominatimResponse[]?> ToJson();
+    }
+
+    public abstract class NominatimAPI: INominatimAPIInterface
     {
 		public string Path { get; set; } = "";
 		public string Url { get; set; } = "https://nominatim.openstreetmap.org";

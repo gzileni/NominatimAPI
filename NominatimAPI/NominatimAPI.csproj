@@ -4,11 +4,11 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <ReleaseVersion>1.0</ReleaseVersion>
+    <ReleaseVersion>1.1</ReleaseVersion>
     <Description>.Net Package to search OSM data by name and address by Nominatim.org API.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Nominatim</PackageId>
-    <PackageVersion>1.0.0</PackageVersion>
+    <PackageVersion>1.1</PackageVersion>
     <PackageLicenseExpression>
         MS-PL
     </PackageLicenseExpression>
@@ -20,7 +20,6 @@
     <Copyright>
         Copyright® 2023 Giuseppe Zileni
     </Copyright>
-    <ReleaseVersion>1.0.0</ReleaseVersion>
     <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 

@@ -5,7 +5,14 @@ using NetTopologySuite.Features;
 
 namespace NominatimAPI
 {
-	public class NominatimAPISearch : NominatimAPI
+    public interface INominatimAPISearchInterface : INominatimAPIInterface
+    {
+        abstract Task<SearchResultsXML?> ToXml();
+        void SetLimitation(SearchResultLimitation? _limitations = null);
+        void SetParameters(NominatimSearch _search);
+    }
+
+	public class NominatimAPISearch : NominatimAPI, INominatimAPISearchInterface
     {
         public NominatimSearch? Search;
         public SearchResultLimitation? Limitations;
@@ -15,6 +22,9 @@ namespace NominatimAPI
             this.Search = _search;
             this.Limitations = _limitations;
 		}
+
+        public void SetLimitation(SearchResultLimitation? _limitations = null) => this.Limitations = _limitations;
+        public void SetParameters(NominatimSearch _search) => this.Search = _search;
 
         protected static SearchResultsXML? DeSerializeToXML(string xml)
         {
