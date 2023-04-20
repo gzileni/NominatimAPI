@@ -38,7 +38,7 @@ namespace NominatimAPI
             return null;
         }
 
-        private static NominatinResponse[]? DeSerializeToJsonArray(string? features)
+        protected static NominatimResponse[]? DeSerializeToJsonArray(string? features)
         {
             if (features is not null)
             {
@@ -46,14 +46,14 @@ namespace NominatimAPI
                 using (var stringReader = new StringReader(features))
                 using (var jsonReader = new JsonTextReader(stringReader))
                 {
-                    return serializer.Deserialize<NominatinResponse[]>(jsonReader);
+                    return serializer.Deserialize<NominatimResponse[]>(jsonReader);
                 }
             }
 
             return null;
         }
 
-        private static NominatinResponse? DeSerializeToJson(string? features)
+        protected static NominatimResponse? DeSerializeToJson(string? features)
         {
             if (features is not null)
             {
@@ -61,7 +61,7 @@ namespace NominatimAPI
                 using (var stringReader = new StringReader(features))
                 using (var jsonReader = new JsonTextReader(stringReader))
                 {
-                    return serializer.Deserialize<NominatinResponse>(jsonReader);
+                    return serializer.Deserialize<NominatimResponse>(jsonReader);
                 }
             }
 
@@ -102,30 +102,43 @@ namespace NominatimAPI
 
         public abstract string GetUrl(EOutuputFormat output);
 
+        protected void SetPolygonOutput(ref List<string> qList)
+        {
+            /** set Output details */
+            qList.Add("polygon_svg=1");
+        }
+
+        protected void SetOutputDetails(ref List<string> qList)
+        {
+            /** set Output details */
+            qList.Add("addressdetails=1");
+            qList.Add("extratags=1");
+            qList.Add("namedetails=1");
+        }
+
+        protected void SetFormatOutput(ref List<string> qList, EOutuputFormat output)
+        {
+            /** set Output details */
+            qList.Add($"format={this.Output[output]}");
+        }
+
         protected static async Task<FeatureCollection?> GetFeatures(string url)
         {
             string result = await GetData(url);
             return DeSerializeFeatureCollection(result);
         }
 
-        public virtual async Task<FeatureCollection?> Features()
+        public virtual async Task<FeatureCollection?> ToGeoJson()
         {
             string url = this.GetUrl(EOutuputFormat.GEOJSON);
             return await GetFeatures(url);
         }
 
-        public virtual async Task<NominatinResponse[]?> ToJsonArray()
+        public virtual async Task<NominatimResponse[]?> ToJson()
         {
             string url = this.GetUrl(EOutuputFormat.JSON);
             string result = await GetData(url);
             return DeSerializeToJsonArray(result);
-        }
-
-        public virtual async Task<NominatinResponse?> ToJson()
-        {
-            string url = this.GetUrl(EOutuputFormat.JSON);
-            string result = await GetData(url);
-            return DeSerializeToJson(result);
         }
     }
 }

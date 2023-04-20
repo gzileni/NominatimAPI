@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Xml.Serialization;
+
 namespace NominatimAPI
 {
 	public class NominatimAPILookup : NominatimAPI
@@ -9,6 +11,19 @@ namespace NominatimAPI
 		{
 			this.Lookup = _lookup;
 		}
+
+        protected static LookupResultsXML? DeSerializeToXML(string xml)
+        {
+            var serializer = new XmlSerializer(typeof(LookupResultsXML));
+            LookupResultsXML? result;
+
+            using (TextReader reader = new StringReader(xml))
+            {
+                result = (LookupResultsXML?)serializer.Deserialize(reader);
+            }
+
+            return result;
+        }
 
         public override string GetUrl(EOutuputFormat output)
         {
@@ -34,12 +49,19 @@ namespace NominatimAPI
             }
 
             qList.Add($"osm_ids={qIDS}");
-            qList.Add("addressdetails=1");
-            qList.Add("extratags=1");
-            qList.Add("namedetails=1");
-            qList.Add($"format={this.Output[output]}");
+
+            this.SetOutputDetails(ref qList);
+            this.SetPolygonOutput(ref qList);
+            this.SetFormatOutput(ref qList, output);
 
             return $"{url}{GetQueryFromList(qList)}";
+        }
+
+        public virtual async Task<LookupResultsXML?> ToXml()
+        {
+            string url = this.GetUrl(EOutuputFormat.XML);
+            string result = await GetData(url);
+            return DeSerializeToXML(result);
         }
     }
 }

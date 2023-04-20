@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using System.Xml.Serialization;
 
 namespace NominatimAPI
 {
@@ -39,7 +40,7 @@ namespace NominatimAPI
     {
         public string City { get; set; } = "";
         public string? Street { get; set; }
-        public string? Country { get; set; } = "Italy";
+        public string? Country { get; set; }
         public string? County { get; set; }
         public string? State { get; set; }
         public string? Postalcode { get; set; }
@@ -58,75 +59,70 @@ namespace NominatimAPI
         public int? Way { get; set; }
     }
 
-    public class NominatimAddress
+    public class SearchResultLimitation
     {
-        [JsonPropertyName("city")]
-        public string? City { get; set; }
-        [JsonPropertyName("city_district")]
-        public string? CityDistrict { get; set; }
-        [JsonPropertyName("construction")]
-        public string? Construction { get; set; }
-        [JsonPropertyName("continent")]
-        public string? Continent { get; set; }
-        [JsonPropertyName("country")]
-        public string? Country { get; set; }
-        [JsonPropertyName("country_code")]
-        public string? CountryCode { get; set; }
-        [JsonPropertyName("house_number")]
-        public string? HouseNumber { get; set; }
-        [JsonPropertyName("neighbourhood")]
-        public string? Neighbourhood { get; set; }
-        [JsonPropertyName("postcode")]
-        public string? Postcode { get; set; }
-        [JsonPropertyName("public_building")]
-        public string? PublicBuilding { get; set; }
-        [JsonPropertyName("state")]
-        public string? State { get; set; }
-        [JsonPropertyName("suburb")]
-        public string? Suburb { get; set; }
-        [JsonPropertyName("road")]
-        public string? Road { get; set; }
-        [JsonPropertyName("village")]
-        public string? Village { get; set; }
-        [JsonPropertyName("state_district")]
-        public string? StateDistrict { get; set; }
+        /** 
+         * Limit search results to one or more countries. 
+         * <countrycode> must be the ISO 3166-1alpha2 code, 
+         * e.g. gb for the United Kingdom, de for Germany.
+         * Each place in Nominatim is assigned to one country code based on OSM country boundaries. 
+         * In rare cases a place may not be in any country at all, for example, in international waters. */
+        public List<string>? CountryCodes { get; set; }
+        /**
+         * If you do not want certain OSM objects to appear in the search result, give a comma separated list of the place_ids you want to skip. 
+         * This can be used to retrieve additional search results. 
+         * For example, if a previous query only returned a few results, then including those here would cause the search to return other, 
+         * less accurate, matches (if possible).
+         */
+        public List<string>? ExcludePlaceIds { get; set; }
+        /**
+         * The preferred area to find search results. 
+         * Any two corner points of the box are accepted as long as they span a real box. x is longitude, y is latitude.
+         */
+        public List<double>? ViewBox { get; set; }
+        /**
+         * When a viewbox is given, restrict the result to items contained within that viewbox (see above). 
+         * When viewbox and bounded=1 are given, an amenity only search is allowed. 
+         * Give the special keyword for the amenity in square brackets, e.g. [pub] and a selection of objects of this type is returned. 
+         * There is no guarantee that the result is complete. (Default: 0)
+         * */
+        public int Bounded { get; set; } = 0;
+
+        /**
+         * Limit the number of returned results. (Default: 10, Maximum: 50)
+         */
+        public int Limit { get; set; } = 10;
+
+        /**
+         * If you are making large numbers of request please include an appropriate email address to identify your requests.
+         * Info: https://operations.osmfoundation.org/policies/nominatim/
+         */
+        public string? Email { get; set; }
     }
 
-    public class NominatinResponse
+    public class ReverseResultLimitation
     {
-        [JsonPropertyName("address")]
-        public NominatimAddress? Address { get; set; }
-        [JsonPropertyName("boundingbox")]
-        public string[]? BoundingBox { get; set; }
-        [JsonPropertyName("class")]
-        public string? Class { get; set; }
-        [JsonPropertyName("display_name")]
-        public string? DisplayName { get; set; }
-        [JsonPropertyName("importance")]
-        public string? Importance { get; set; }
-        [JsonPropertyName("lat")]
-        public string? Lat { get; set; }
-        [JsonPropertyName("lon")]
-        public string? Lon { get; set; }
-        [JsonPropertyName("license")]
-        public string? License { get; set; }
-        [JsonPropertyName("osm_id")]
-        public string? OsmId { get; set; }
-        [JsonPropertyName("osm_type")]
-        public string? OsmType { get; set; }
-        [JsonPropertyName("place_id")]
-        public string? PlaceId { get; set; }
-        [JsonPropertyName("svg")]
-        public string? Svg { get; set; }
-        [JsonPropertyName("type")]
-        public string? Type { get; set; }
-        [JsonPropertyName("place_rank")]
-        public string? PlaceRank { get; set; }
-        [JsonPropertyName("category")]
-        public string? Category { get; set; }
-        [JsonPropertyName("addresstype")]
-        public string? AddressType { get; set; }
-        [JsonPropertyName("name")]
-        public string? Name { get; set; }
+        /**
+         * Level of detail required for the address. Default: 18. 
+         * This is a number that corresponds roughly to the zoom level used in XYZ tile sources in frameworks like Leaflet.js, Openlayers etc. 
+         * In terms of address details the zoom levels are as follows:
+
+            zoom	address detail
+            ----------------------
+            3	    country
+            5	    state
+            8	    county
+            10	    city
+            12	    town / borough
+            13	    village / suburb
+            14	    neighbourhood
+            15	    locality
+            16	    major streets
+            17	    major and minor streets
+            18	    building
+        */
+        public int Zoom { get; set; } = 18;
     }
 }
+
+

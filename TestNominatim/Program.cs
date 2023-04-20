@@ -6,10 +6,31 @@ NominatimSearch searchData = new()
     City = "Gioia del Colle"
 };
 
+/** setup search response limit */
+/** Info: https://nominatim.org/release-docs/develop/api/Search/#result-limitation */
+SearchResultLimitation searchLimit = new SearchResultLimitation()
+{
+    Limit = 1,
+    Bounded = 0,
+    CountryCodes = new List<string>()
+    {
+        "it"
+    },
+    ExcludePlaceIds = null,
+    ViewBox = null
+};
+
 NominatimReverse reverseData = new()
 {
     Lat = 40.798838,
     Lon = 16.921660
+};
+
+/** setup reverse response limitation */
+/** Info: https://nominatim.org/release-docs/develop/api/Reverse/#result-limitation */
+ReverseResultLimitation reverseLimit = new ReverseResultLimitation()
+{
+    Zoom = 18
 };
 
 NominatimLookup lookupData = new()
@@ -19,21 +40,23 @@ NominatimLookup lookupData = new()
     Node = 240109189
 };
 
-NominatimAPISearch search = new(searchData);
-NominatimAPIReverse reverse = new(reverseData);
+NominatimAPISearch search = new(searchData, searchLimit);
+NominatimAPIReverse reverse = new(reverseData, reverseLimit);
 NominatimAPILookup lookup = new(lookupData);
 
-FeatureCollection? fs = await search.Features();
-FeatureCollection? fr = await reverse.Features();
-FeatureCollection? fl = await lookup.Features();
+/** Get Features Collection */
+FeatureCollection? fs = await search.ToGeoJson();
+FeatureCollection? fr = await reverse.ToGeoJson();
+FeatureCollection? fl = await lookup.ToGeoJson();
 
-NominatinResponse[]? rs = await search.ToJsonArray();
-NominatinResponse? rr = await reverse.ToJson();
+/** Get Json Data */
+NominatimResponse[]? rs = await search.ToJson();
+NominatimResponse[]? rr = await reverse.ToJson();
+NominatimResponse[]? rl = await lookup.ToJson();
 
-// TODO:
-// 1 - Lookup Json
-// 2 - Search Xml
-// 3 - Reverse Xml
-// 4 - Lookup Xml
+/** Get Xml data */
+SearchResultsXML? xs = await search.ToXml();
+ReverseGeocodeXML? xr = await reverse.ToXml();
+LookupResultsXML? xl = await lookup.ToXml();
 
 Console.WriteLine(fs);
