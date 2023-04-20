@@ -7,7 +7,7 @@
     <Description>.Net Package to search OSM data by name and address by Nominatim.org API.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Nominatim</PackageId>
-    <PackageVersion>1.1</PackageVersion>
+    <PackageVersion>1.2</PackageVersion>
     <PackageLicenseExpression>
         MS-PL
     </PackageLicenseExpression>

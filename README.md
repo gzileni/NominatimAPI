@@ -5,7 +5,7 @@
 ## Install
 
 ```bash
-dotnet add package Nominatim --version 1.0.0
+dotnet add package Nominatim --version 1.2
 ```
 
 ## [Search](https://nominatim.org/release-docs/develop/api/Search/)
@@ -36,7 +36,10 @@ SearchResultLimitation searchLimit = new SearchResultLimitation()
     ViewBox = null
 };
 
-NominatimAPISearch search = new(searchData, searchLimit);
+NominatimAPISearch search = new();
+
+search.SetParameters(searchData);
+search.SetLimitation(searchLimit);
 
 /** Get Features Collection */
 FeatureCollection? fs = await search.ToGeoJson();
@@ -70,7 +73,10 @@ ReverseResultLimitation reverseLimit = new ReverseResultLimitation()
     Zoom = 18
 };
 
-NominatimAPIReverse reverse = new(reverseData, reverseLimit);
+NominatimAPIReverse reverse = new();
+
+reverse.SetParameters(reverseData);
+reverse.SetLimitation(reverseLimit);
 
 /** Get Features Collection */
 FeatureCollection? fr = await reverse.ToGeoJson();
@@ -100,6 +106,8 @@ NominatimLookup lookupData = new()
 };
 
 NominatimAPILookup lookup = new(lookupData);
+
+lookup.SetParameters(lookupData);
 
 /** Get Features Collection */
 FeatureCollection? fl = await lookup.ToGeoJson();
@@ -189,7 +197,9 @@ NominatimSearch searchData = new()
     City = "Gioia del Colle"
 };
 
-NominatimAPISearch search = new(searchData);
+NominatimAPISearch search = new();
+
+search.SetParameters(searchData);
 
 search.Url = "http://my-container-nominatim";
 FeatureCollection? fs = await search.ToGeoJson();
