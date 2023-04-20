@@ -83,7 +83,7 @@ ReverseGeocodeXML? xr = await reverse.ToXml();
 
 ```
 
-## Address Lookup
+## [Address Lookup](https://nominatim.org/release-docs/develop/api/Lookup/)
 
 The lookup API allows to query the address and other details of one or multiple OSM objects like node, way or relation.
 
