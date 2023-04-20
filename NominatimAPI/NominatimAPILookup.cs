@@ -11,11 +11,11 @@ namespace NominatimAPI
 
 	public class NominatimAPILookup : NominatimAPI, INominatimAPILookupInterface
     {
-		NominatimLookup Lookup;
+		NominatimLookup? Lookup;
 
-        public NominatimAPILookup(NominatimLookup _lookup)
+        public NominatimAPILookup()
 		{
-			this.Lookup = _lookup;
+
 		}
 
         public void SetParameters(NominatimLookup _lookup) => this.Lookup = _lookup;
