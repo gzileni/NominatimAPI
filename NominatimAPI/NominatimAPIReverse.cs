@@ -16,10 +16,8 @@ namespace NominatimAPI
         public NominatimReverse? Reverse;
         public ReverseResultLimitation? Limitations;
 
-        public NominatimAPIReverse(NominatimReverse _reverse, ReverseResultLimitation? _limitations = null)
+        public NominatimAPIReverse()
         {
-            this.Reverse = _reverse;
-            this.Limitations = _limitations;
         }
 
         public void SetLimitation(ReverseResultLimitation? _limitations = null) => this.Limitations = _limitations;

@@ -17,10 +17,8 @@ namespace NominatimAPI
         public NominatimSearch? Search;
         public SearchResultLimitation? Limitations;
 
-        public NominatimAPISearch(NominatimSearch _search, SearchResultLimitation? _limitations = null)
+        public NominatimAPISearch()
 		{
-            this.Search = _search;
-            this.Limitations = _limitations;
 		}
 
         public void SetLimitation(SearchResultLimitation? _limitations = null) => this.Limitations = _limitations;

@@ -5,7 +5,7 @@
 ## Install
 
 ```bash
-dotnet add package Nominatim --version 1.0.0
+dotnet add package Nominatim --version 1.2
 ```
 
 ## [Search](https://nominatim.org/release-docs/develop/api/Search/)
@@ -36,7 +36,10 @@ SearchResultLimitation searchLimit = new SearchResultLimitation()
     ViewBox = null
 };
 
-NominatimAPISearch search = new(searchData, searchLimit);
+NominatimAPISearch search = new();
+
+search.SetParameters(searchData);
+search.SetLimitation(searchLimit);
 
 /** Get Features Collection */
 FeatureCollection? fs = await search.ToGeoJson();
@@ -70,7 +73,10 @@ ReverseResultLimitation reverseLimit = new ReverseResultLimitation()
     Zoom = 18
 };
 
-NominatimAPIReverse reverse = new(reverseData, reverseLimit);
+NominatimAPIReverse reverse = new();
+
+reverse.SetParameters(reverseData);
+reverse.SetLimitation(reverseLimit);
 
 /** Get Features Collection */
 FeatureCollection? fr = await reverse.ToGeoJson();
@@ -101,6 +107,8 @@ NominatimLookup lookupData = new()
 
 NominatimAPILookup lookup = new(lookupData);
 
+lookup.SetParameters(lookupData);
+
 /** Get Features Collection */
 FeatureCollection? fl = await lookup.ToGeoJson();
 
@@ -122,41 +130,53 @@ builder.Services.AddScoped<INominatimAPIReverseInterface, NominatimAPIReverse>()
 builder.Services.AddScoped<INominatimAPILookupInterface, NominatimAPILookup>();
 ```
 
-Inject the service like this:
+Inject the service like this Controller:
 
 ```C#
 
-class MyClass {
+using Microsoft.AspNetCore.Mvc;
+using NetTopologySuite.Features;
+using NominatimAPI;
 
-    private readonly INominatimAPISearchInterface NominatimSearch;
-
-    public MyClass(INominatimAPISearchInterface _nominatimSearch) {
-        this.NominatimSearch = _nominatimSearch;
+[Route("api/[controller]")]
+public class NominatimController : ControllerBase
+{
+    private readonly INominatimAPISearchInterface? _nominatim;
+    
+    public NominatimController(INominatimAPISearchInterface? nominatim)
+    {
+        this._nominatim = nominatim;
     }
 
-    public void MyMethod() {
-
-        NominatimSearch searchData = new()
+    [HttpPost]
+    [ProducesResponseType(201, Type = typeof(FeatureCollection))]
+    [ProducesResponseType(204, Type = typeof(FeatureCollection))]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult?> Post([FromBody] NominatimSearch parameters)
+    {
+        try
         {
-            City = "Gioia del Colle"
-        };
-
-        SearchResultLimitation searchLimit = new SearchResultLimitation()
-        {
-            Limit = 1,
-            Bounded = 0,
-            CountryCodes = new List<string>()
+            SearchResultLimitation searchLimit = new SearchResultLimitation()
             {
-                "it", "de"
-            },
-            ExcludePlaceIds = null,
-            ViewBox = null
-        };
+                Limit = 1,
+                Bounded = 0,
+                CountryCodes = new List<string>()
+                {
+                    "it"
+                },
+                ExcludePlaceIds = null,
+                ViewBox = null
+            };
 
-        this.NominatimSearch.SetParameters(searchData);
-        this.NominatimSearch.SetLimitation(searchLimit);
-
-        NominatimResponse[]? rs = await search.ToJson();
+            this._nominatim!.SetParameters(parameters);
+            this._nominatim!.SetLimitation(searchLimit);
+            FeatureCollection? featuresCollection = await this._nominatim.ToGeoJson();
+            return Ok(featuresCollection);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 }
 ```
@@ -177,7 +197,9 @@ NominatimSearch searchData = new()
     City = "Gioia del Colle"
 };
 
-NominatimAPISearch search = new(searchData);
+NominatimAPISearch search = new();
+
+search.SetParameters(searchData);
 
 search.Url = "http://my-container-nominatim";
 FeatureCollection? fs = await search.ToGeoJson();
