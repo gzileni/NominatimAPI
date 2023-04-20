@@ -3,14 +3,22 @@ using System.Xml.Serialization;
 
 namespace NominatimAPI
 {
-	public class NominatimAPILookup : NominatimAPI
-	{
+    public interface INominatimAPILookupInterface : INominatimAPIInterface
+    {
+        void SetParameters(NominatimLookup _lookup);
+        abstract Task<LookupResultsXML?> ToXml();
+    }
+
+	public class NominatimAPILookup : NominatimAPI, INominatimAPILookupInterface
+    {
 		NominatimLookup Lookup;
 
         public NominatimAPILookup(NominatimLookup _lookup)
 		{
 			this.Lookup = _lookup;
 		}
+
+        public void SetParameters(NominatimLookup _lookup) => this.Lookup = _lookup;
 
         protected static LookupResultsXML? DeSerializeToXML(string xml)
         {

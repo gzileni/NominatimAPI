@@ -4,7 +4,14 @@ using NetTopologySuite.Features;
 
 namespace NominatimAPI
 {
-    public class NominatimAPIReverse: NominatimAPI
+    public interface INominatimAPIReverseInterface : INominatimAPIInterface
+    {
+        void SetLimitation(ReverseResultLimitation? _limitations = null);
+        void SetParameters(NominatimReverse _reverse);
+        abstract Task<ReverseGeocodeXML?> ToXml();
+    }
+
+    public class NominatimAPIReverse: NominatimAPI, INominatimAPIReverseInterface
     {
         public NominatimReverse? Reverse;
         public ReverseResultLimitation? Limitations;
@@ -14,6 +21,9 @@ namespace NominatimAPI
             this.Reverse = _reverse;
             this.Limitations = _limitations;
         }
+
+        public void SetLimitation(ReverseResultLimitation? _limitations = null) => this.Limitations = _limitations;
+        public void SetParameters(NominatimReverse _reverse) => this.Reverse = _reverse;
 
         protected static ReverseGeocodeXML? DeSerializeToXML(string xml)
         {
