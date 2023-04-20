@@ -112,6 +112,55 @@ LookupResultsXML? xl = await lookup.ToXml();
 
 ```
 
+## Dependency Injection
+
+In `Program.cs` of your ASP.Net Core project configure the services:
+
+```C#
+builder.Services.AddScoped<INominatimAPISearchInterface, NominatimAPISearch>();
+builder.Services.AddScoped<INominatimAPIReverseInterface, NominatimAPIReverse>();
+builder.Services.AddScoped<INominatimAPILookupInterface, NominatimAPILookup>();
+```
+
+Inject the service like this:
+
+```C#
+
+class MyClass {
+
+    private readonly INominatimAPISearchInterface NominatimSearch;
+
+    public MyClass(INominatimAPISearchInterface _nominatimSearch) {
+        this.NominatimSearch = _nominatimSearch;
+    }
+
+    public void MyMethod() {
+
+        NominatimSearch searchData = new()
+        {
+            City = "Gioia del Colle"
+        };
+
+        SearchResultLimitation searchLimit = new SearchResultLimitation()
+        {
+            Limit = 1,
+            Bounded = 0,
+            CountryCodes = new List<string>()
+            {
+                "it", "de"
+            },
+            ExcludePlaceIds = null,
+            ViewBox = null
+        };
+
+        this.NominatimSearch.SetParameters(searchData);
+        this.NominatimSearch.SetLimitation(searchLimit);
+
+        NominatimResponse[]? rs = await search.ToJson();
+    }
+}
+```
+
 ## Custom Docker Image Nominatim
 
 You can configure a nominatim docker image to query your own docker stack. Just configure the new address from the Url property.
